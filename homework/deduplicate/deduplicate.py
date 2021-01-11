@@ -9,6 +9,11 @@ class Deduplicator:
     If no primary keys were provided should be removed only identical rows.
     """
 
-    # ToDo: Implement this method
     def deduplicate(self, primary_keys: Union[str, List[str]], dataframe: DataFrame) -> DataFrame:
-        pass
+        if primary_keys:
+            if isinstance(primary_keys, list):
+                return dataframe.drop_duplicates(subset=primary_keys)
+            else:
+                return dataframe.drop_duplicates(subset=[primary_keys])
+        else:
+            return dataframe.drop_duplicates()
