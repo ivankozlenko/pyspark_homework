@@ -22,10 +22,6 @@ class SchemaMerging:
         return dataframe1.unionByName(dataframe2)
 
     @staticmethod
-    def _get_col_types(df: DataFrame):
-        return [x[1] for x in df.dtypes]
-
-    @staticmethod
     def _has_same_name_with_different_type(col_name: str, col_mapping: dict) -> bool:
         '''If column with given has different data types in given dataframes'''
         return ((col_name in col_mapping[0]) and (col_name in col_mapping[1])) and \
