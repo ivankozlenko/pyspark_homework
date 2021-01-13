@@ -67,10 +67,10 @@ def test_merge_schemas_diff_types(spark_session: SparkSession):
     )
     merger = SchemaMerging()
     result = merger.union(df1, df2)
-    assert result.collect() == [Row(id=0, product='potato', weight='0.5', price_bigint='100', price_string=None),
-                                Row(id=1, product='onion', weight='0.5', price_bigint='150', price_string=None),
-                                Row(id=2, product='apple', weight='1', price_bigint='300', price_string=None),
-                                Row(id=3, product='pineapple', weight='1', price_bigint='200', price_string=None)]
+    assert result.collect() == [Row(id=0, product='potato', weight='0.5', price_bigint=100, price_string=None),
+                                Row(id=1, product='onion', weight='0.5', price_bigint=150, price_string=None),
+                                Row(id=2, product='apple', weight='1', price_bigint=None, price_string='300'),
+                                Row(id=3, product='pineapple', weight='1', price_bigint=None, price_string='200')]
 
 
 def test_merge_schemas_no_common(spark_session: SparkSession):
