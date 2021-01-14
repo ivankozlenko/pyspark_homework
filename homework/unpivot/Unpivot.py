@@ -32,8 +32,16 @@ class Unpivot:
     """
 
     def __init__(self, constant_columns: List[str], key_col='', value_col=''):
-        pass
+        self.constant_columns = constant_columns
+        self.key_col = key_col
+        self.value_col = value_col
 
-    # ToDo: implement unpivot transformation
     def unpivot(self, dataframe: DataFrame) -> DataFrame:
-        pass
+        remaining_cols = [col for col in dataframe.columns if col not in self.constant_columns]
+        stacked_cols = [f"'{remaining_col_name}', `{remaining_col_name}`"  # ` - quotes around value to return value!
+                        for remaining_col_name in remaining_cols]
+        stacked_cols_expr = ", ".join(stacked_cols)
+        stack_sql_expr = f"stack({len(remaining_cols)}, {stacked_cols_expr}) " \
+                         f"as ({self.key_col}, {self.value_col})"
+        df = dataframe.selectExpr(*self.constant_columns, stack_sql_expr)
+        return df
