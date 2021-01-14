@@ -34,9 +34,11 @@ class HistoryProduct:
         null_safe_join_expr = [dfs['old'][f'{k}_old'].eqNullSafe(dfs['new'][f'{k}_new'])
                                for k in null_safe_keys]
         joined_df = dfs['old'].join(dfs['new'], on=null_safe_join_expr, how='outer')
+        if not self.primary_keys:
+            data_keys = null_safe_keys
 
         # equal if all data keys are equal
-        sql_equal_expr = ' AND '.join([f'{k}_old = {k}_new' for k in data_keys])
+        sql_equal_expr = ' AND '.join([f'{k}_old <=> {k}_new' for k in data_keys])
 
         # inserted if all old fields are null
         sql_inserted_expr = ' AND '.join([f'{k}_old IS NULL' for k in data_keys])
@@ -52,7 +54,7 @@ class HistoryProduct:
                 .otherwise('changed')
         )
 
-        for name in join_keys + data_keys:
+        for name in old_dataframe.columns:
             # move data from old columns to new columns, in order to save it when we drop old columns
             joined_df = joined_df.withColumn(
                 f'{name}_new',
@@ -61,7 +63,7 @@ class HistoryProduct:
             )
 
         # drop old columns, remove 'new' suffix from remaining columns
-        joined_df = joined_df.drop(*[f'{name}_old' for name in join_keys + data_keys])
+        joined_df = joined_df.drop(*[f'{name}_old' for name in old_dataframe.columns])
         for name in data_keys:
             joined_df = joined_df.withColumnRenamed(f'{name}_new', name)
 
