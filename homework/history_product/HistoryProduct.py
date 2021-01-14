@@ -30,8 +30,9 @@ class HistoryProduct:
             select_keys = aliased_keys
             dfs[df_alias] = df.select(*select_keys)
 
+        null_safe_keys = join_keys or data_keys
         null_safe_join_expr = [dfs['old'][f'{k}_old'].eqNullSafe(dfs['new'][f'{k}_new'])
-                               for k in join_keys] if join_keys else None
+                               for k in null_safe_keys]
         joined_df = dfs['old'].join(dfs['new'], on=null_safe_join_expr, how='outer')
 
         # equal if all data keys are equal
