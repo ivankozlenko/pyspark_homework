@@ -43,5 +43,8 @@ class Unpivot:
         stacked_cols_expr = ", ".join(stacked_cols)
         stack_sql_expr = f"stack({len(remaining_cols)}, {stacked_cols_expr}) " \
                          f"as ({self.key_col}, {self.value_col})"
-        df = dataframe.selectExpr(*self.constant_columns, stack_sql_expr)
+        select = self.constant_columns
+        if stacked_cols_expr:
+            select.append(stack_sql_expr)
+        df = dataframe.selectExpr(*select)
         return df
