@@ -4,6 +4,9 @@ from pyspark.sql.functions import to_timestamp
 from processors import BaseProcessor
 
 
+BIDS_FILE = 'input/bids.txt'
+
+
 class ErroneousRecordsProcessor(BaseProcessor):
     """
     Task 1: Erroneous records
@@ -70,6 +73,6 @@ class ErroneousRecordsProcessor(BaseProcessor):
 
 if __name__ == '__main__':
     spark = SparkSession.builder.master("local").getOrCreate()
-    errors = ErroneousRecordsProcessor(spark, 'input/bids.txt')
+    errors = ErroneousRecordsProcessor(spark, BIDS_FILE)
     errors.count_errors()
     spark.stop()

@@ -1,7 +1,10 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import to_timestamp
+from pyspark.sql.functions import to_timestamp, to_date
 
 from processors import BaseProcessor
+
+
+EXCHANGE_RATES_FILE = 'input/exchange_rate.txt'
 
 
 class ExchangeRatesProcessor(BaseProcessor):
@@ -32,14 +35,18 @@ class ExchangeRatesProcessor(BaseProcessor):
         )
 
     def get_mapping(self):
-        data = self.df[['ValidFrom', 'ExchangeRate']].distinct().collect()
-        mapping = {row['ValidFrom']: row['ExchangeRate'] for row in data}
+        data = self.df.withColumn(
+            'date',
+            to_date('ValidFrom_as_date')
+        )
+        data = data[['date', 'ExchangeRate']].distinct().collect()
+        mapping = {row['date']: row['ExchangeRate'] for row in data}
         return mapping
 
 
 if __name__ == '__main__':
     spark = SparkSession.builder.master("local").getOrCreate()
-    exchange_rates = ExchangeRatesProcessor(spark, 'input/exchange_rate.txt')
+    exchange_rates = ExchangeRatesProcessor(spark, EXCHANGE_RATES_FILE)
     exchange_rates.show_df()
     print(exchange_rates.get_mapping())
     spark.stop()
