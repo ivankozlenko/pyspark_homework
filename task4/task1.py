@@ -1,11 +1,10 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp
 
+from processors import BaseProcessor
 
-BIDS_PATH = 'input/bids.txt'
 
-
-class ErroneousRecordsProcessor:
+class ErroneousRecordsProcessor(BaseProcessor):
     """
     Task 1: Erroneous records
 
@@ -23,12 +22,11 @@ class ErroneousRecordsProcessor:
     """
 
     def __init__(self, spark_context, file_path):
-        self.sc = spark_context
-        self.bids_header = [
+        super().__init__(spark_context, file_path)
+        self.header = [
             "MotelID", "BidDate", "HU", "UK", "NL", "US", "MX", "AU", "CA",
             "CN", "KR", "BE", "I", "JP", "IN", "HN", "GY", "DE"
         ]
-        self.df = self.sc.read.csv(file_path, header=None)
         self._process_dataset()
 
     def count_errors(self, n_rows_to_display: int = 10):
@@ -55,9 +53,8 @@ class ErroneousRecordsProcessor:
         return output
 
     def _process_dataset(self):
-        timestamp_col_name = self.bids_header[1]
-        for old_col, new_col in zip(self.df.columns, self.bids_header):
-            self.df = self.df.withColumnRenamed(old_col, new_col)
+        super()._process_dataset()
+        timestamp_col_name = self.header[1]
         self.df = self.df.withColumn(
             timestamp_col_name,
             to_timestamp(self.df[timestamp_col_name], format='HH-dd-MM-yyyy')
@@ -66,6 +63,6 @@ class ErroneousRecordsProcessor:
 
 if __name__ == '__main__':
     spark = SparkSession.builder.master("local").getOrCreate()
-    errors = ErroneousRecordsProcessor(spark, BIDS_PATH)
+    errors = ErroneousRecordsProcessor(spark, 'input/bids.txt')
     errors.count_errors()
     spark.stop()
