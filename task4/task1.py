@@ -2,7 +2,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp
 
 
-spark = SparkSession.builder.master("local").getOrCreate()
 BIDS_PATH = 'input/bids.txt'
 
 
@@ -27,7 +26,7 @@ class ErroneousRecordsProcessor:
         self.sc = spark_context
         self.bids_header = [
             "MotelID", "BidDate", "HU", "UK", "NL", "US", "MX", "AU", "CA",
-            "CN", "KR","BE", "I","JP", "IN", "HN", "GY", "DE"
+            "CN", "KR", "BE", "I", "JP", "IN", "HN", "GY", "DE"
         ]
         self.df = self.sc.read.csv(file_path, header=None)
         self._process_dataset()
@@ -66,5 +65,7 @@ class ErroneousRecordsProcessor:
 
 
 if __name__ == '__main__':
+    spark = SparkSession.builder.master("local").getOrCreate()
     errors = ErroneousRecordsProcessor(spark, BIDS_PATH)
     errors.count_errors()
+    spark.stop()
