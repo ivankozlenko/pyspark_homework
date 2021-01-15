@@ -40,9 +40,16 @@ class ErroneousRecordsProcessor(BaseProcessor):
             print(f'Displaying first {n_rows_to_display} error rows')
         print('\n'.join(grouped_errors[:n_rows_to_display]))
 
+    def get_clean_records(self):
+        """Returns dataframe without erroneous records"""
+        return self.df.filter(~self._error_condition())
+
     def _filter_errors(self):
-        error_df = self.df.filter(self.df[self.df.columns[2]].rlike('ERROR.*'))
+        error_df = self.df.filter(self._error_condition())
         return error_df
+
+    def _error_condition(self):
+        return self.df[self.df.columns[2]].rlike('ERROR.*')
 
     def _group_errors_by_hour(self, errors_df):
         group_by_cols = self.df.columns[1:3]
